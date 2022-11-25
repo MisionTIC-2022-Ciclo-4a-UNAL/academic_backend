@@ -21,23 +21,26 @@
 """
 
 from models.course import Course
+from models.department import Department
 from repositories.course_repository import CourseRepository
+from repositories.department_repository import DepartmentRepository
 
 
-# TODO check validations and errors codes
 class CourseController:
-
     def __init__(self):
         """
-        This is the constructor of the CourseController class
+        Constructor of the CourseController class
         """
+        print("Course controller ready...")
         self.course_repository = CourseRepository()
+        self.department_repository = DepartmentRepository()
 
     def index(self) -> list:
         """
 
         :return:
         """
+        print("Get all")
         return self.course_repository.find_all()
 
     def show(self, id_: str) -> dict:
@@ -46,6 +49,7 @@ class CourseController:
         :param id_:
         :return:
         """
+        print("Show one by id")
         return self.course_repository.find_by_id(id_)
 
     def create(self, course_: dict) -> dict:
@@ -54,16 +58,18 @@ class CourseController:
         :param course_:
         :return:
         """
+        print("Insert")
         course = Course(course_)
         return self.course_repository.save(course)
 
-    def update(self, id_, course_: dict) -> dict:
+    def update(self, id_: str, course_: dict) -> dict:
         """
 
         :param id_:
         :param course_:
         :return:
         """
+        print("Update")
         course = Course(course_)
         return self.course_repository.update(id_, course)
 
@@ -73,4 +79,13 @@ class CourseController:
         :param id_:
         :return:
         """
+        print("Delete")
         return self.course_repository.delete(id_)
+
+    def department_assign(self, course_id: str, department_id: str) -> dict:
+        course_dict = self.course_repository.find_by_id(course_id)
+        course_obj = Course(course_dict)
+        department_dict = self.department_repository.find_by_id(department_id)
+        department_obj = Department(department_dict)
+        course_obj.department = department_obj
+        return self.course_repository.save(course_obj)

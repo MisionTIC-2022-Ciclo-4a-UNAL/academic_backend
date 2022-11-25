@@ -20,21 +20,20 @@
  # If not, see <https://www.gnu.org/licenses/>.
 """
 
+from models.course import Course
 from models.enrollment import Enrollment
+from models.student import Student
 from repositories.enrollment_repository import EnrollmentRepository
+from repositories.course_repository import CourseRepository
+from repositories.student_repository import StudentRepository
 
-
-# TODO check validations and errors codes
 class EnrollmentController:
-
     def __init__(self):
-        """
-        This is the constructor of the EnrollmentController class
-        """
         print("Enrollment controller ready")
         self.enrollment_repository = EnrollmentRepository()
+        self.course_repository = CourseRepository()
+        self.student_repository = StudentRepository()
 
-    # Equivalent to 'all'
     def index(self) -> list:
         """
 
@@ -50,13 +49,29 @@ class EnrollmentController:
         """
         return self.enrollment_repository.find_by_id(id_)
 
-    def create(self, enrollment_: dict) -> dict:
+    def get_by_course(self, course_id: str) -> list:
         """
 
+        :param course_id:
+        :return:
+        """
+        return self.enrollment_repository.get_students_in_course(course_id)
+
+    def create(self, enrollment_: dict, course_id: str, student_id: str) -> dict:
+        """
+
+        :param student_id:
+        :param course_id:
         :param enrollment_:
         :return:
         """
         enrollment = Enrollment(enrollment_)
+        course_dict = self.course_repository.find_by_id(course_id)
+        course_obj = Course(course_dict)
+        student_dict = self.student_repository.find_by_id(student_id)
+        student_obj = Student(student_dict)
+        enrollment.course = course_obj
+        enrollment.student = student_obj
         return self.enrollment_repository.save(enrollment)
 
     def update(self, id_: str, enrollment_: dict) -> dict:

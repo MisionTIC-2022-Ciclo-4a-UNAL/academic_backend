@@ -28,7 +28,7 @@ course_controller = CourseController()
 
 
 @course_blueprints.route("/course/all", methods=['GET'])
-def get_courses():
+def get_all_courses():
     response = course_controller.index()
     return response, 200
 
@@ -50,6 +50,12 @@ def insert_course():
 def update_course(id_):
     course = request.get_json()
     response = course_controller.update(id_, course)
+    return response, 201
+
+
+@course_blueprints.route("/course/<string:course_id>/department/<string:department_id>", methods=['PUT'])
+def assign_department(course_id, department_id):
+    response = course_controller.department_assign(course_id, department_id)
     return response, 201
 
 

@@ -28,7 +28,7 @@ enrollment_controller = EnrollmentController()
 
 
 @enrollment_blueprints.route("/enrollment/all", methods=['GET'])
-def get_enrollments():
+def get_all_enrollments():
     response = enrollment_controller.index()
     return response, 200
 
@@ -39,10 +39,16 @@ def get_enrollment_by_id(id_):
     return response, 200
 
 
-@enrollment_blueprints.route("/enrollment/insert", methods=['POST'])
-def insert_enrollment():
+@enrollment_blueprints.route("/enrollment/course/<string:course_id>", methods=['GET'])
+def get_enrollment_by_course(course_id):
+    response = enrollment_controller.get_by_course(course_id)
+    return response, 200
+
+
+@enrollment_blueprints.route("/enrollment/insert/course/<string:course_id>/student/<string:student_id>", methods=['POST'])
+def insert_enrollment(course_id, student_id):
     enrollment = request.get_json()
-    response = enrollment_controller.create(enrollment)
+    response = enrollment_controller.create(enrollment, course_id, student_id)
     return response, 201
 
 
