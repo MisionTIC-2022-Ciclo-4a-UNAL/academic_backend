@@ -27,6 +27,7 @@ from repositories.enrollment_repository import EnrollmentRepository
 from repositories.course_repository import CourseRepository
 from repositories.student_repository import StudentRepository
 
+
 class EnrollmentController:
     def __init__(self):
         print("Enrollment controller ready")

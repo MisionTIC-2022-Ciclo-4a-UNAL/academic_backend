@@ -54,8 +54,8 @@ class ReportsRepository(InterfaceRepository[Enrollment]):
         :return:
         """
         # Equivalent to WHERE student_fk = ObjectId(id_)
-        query_match = {}
-        if id != "-1":
+        query_match = {"$match": {}}
+        if id_ != "-1":
             query_match = {
                 "$match": {
                     "student.$id": ObjectId(id_)
@@ -105,8 +105,8 @@ class ReportsRepository(InterfaceRepository[Enrollment]):
         :return:
         """
         # Equivalent to WHERE course_fk = ObjectId(id_)
-        query_match = {}
-        if id != "-1":
+        query_match = {"$match": {}}
+        if id_ != "-1":
             query_match = {
                 "$match": {
                     "course.$id": ObjectId(id_)
@@ -119,7 +119,9 @@ class ReportsRepository(InterfaceRepository[Enrollment]):
                 "localField": "course.$id",
                 "foreignField": "_id",
                 "as": "course_info"
-            },
+            }
+        }
+        query_unwind = {
             "$unwind": "$course_info"
         }
         # Equivalent to GROUP BY
@@ -135,12 +137,19 @@ class ReportsRepository(InterfaceRepository[Enrollment]):
                 "name": "$_id.name",
                 "credits": "$_id.credits",
                 "_id": "$_id._id"
-            },
+            }
+        }
+        query_sort = {
             "$sort": {
                 "enrollments": -1
             }
         }
-        pipeline = [query_match, query_lookup, query_group, query_add_fields]
+        pipeline = [query_match,
+                    query_lookup,
+                    query_unwind,
+                    query_group,
+                    query_add_fields,
+                    query_sort]
         return self.query_aggregation(pipeline)
 
     def get_department_enrollments(self) -> list:
@@ -156,6 +165,8 @@ class ReportsRepository(InterfaceRepository[Enrollment]):
                 "foreignField": "_id",
                 "as": "course_info"
             },
+        }
+        query_unwind_courses = {
             "$unwind": "$course_info"
         }
         # Equivalent to make a GROUP BY courses
@@ -163,7 +174,9 @@ class ReportsRepository(InterfaceRepository[Enrollment]):
             "$group": {
                 "_id": "$course_info",
                 "count": {"$sum": 1}
-            },
+            }
+        }
+        query_add_fields_department = {
             "$addFields": {
                 "department": "$_id.department"
             }
@@ -175,7 +188,9 @@ class ReportsRepository(InterfaceRepository[Enrollment]):
                 "localField": "department.$id",
                 "foreignField": "_id",
                 "as": "department_info"
-            },
+            }
+        }
+        query_unwind_department = {
             "$unwind": "$department_info"
         }
         # Equivalent to make GROUP BY and ORDER BY departments
@@ -184,12 +199,21 @@ class ReportsRepository(InterfaceRepository[Enrollment]):
                 "_id": "$department_info",
                 "enrollments": {"$sum": "$count"}
             },
+        }
+        query_add_fields = {
             "$addFields": {
                 "name": "$_id.name",
                 "_id": "$_id._id"
             }
         }
-        pipeline = [query_preprocess_courses, query_group_courses, query_process_departments, query_group_departments]
+        pipeline = [query_preprocess_courses,
+                    query_unwind_courses,
+                    query_group_courses,
+                    query_add_fields_department,
+                    query_process_departments,
+                    query_unwind_department,
+                    query_group_departments,
+                    query_add_fields]
         return self.query_aggregation(pipeline)
 
     def get_departments_distribution(self) -> list:

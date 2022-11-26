@@ -40,7 +40,6 @@ class CourseController:
 
         :return:
         """
-        print("Get all")
         return self.course_repository.find_all()
 
     def show(self, id_: str) -> dict:
@@ -49,7 +48,6 @@ class CourseController:
         :param id_:
         :return:
         """
-        print("Show one by id")
         return self.course_repository.find_by_id(id_)
 
     def create(self, course_: dict) -> dict:
@@ -58,7 +56,6 @@ class CourseController:
         :param course_:
         :return:
         """
-        print("Insert")
         course = Course(course_)
         return self.course_repository.save(course)
 
@@ -69,7 +66,6 @@ class CourseController:
         :param course_:
         :return:
         """
-        print("Update")
         course = Course(course_)
         return self.course_repository.update(id_, course)
 
@@ -79,10 +75,15 @@ class CourseController:
         :param id_:
         :return:
         """
-        print("Delete")
         return self.course_repository.delete(id_)
 
     def department_assign(self, course_id: str, department_id: str) -> dict:
+        """
+
+        :param course_id:
+        :param department_id:
+        :return:
+        """
         course_dict = self.course_repository.find_by_id(course_id)
         course_obj = Course(course_dict)
         department_dict = self.department_repository.find_by_id(department_id)
